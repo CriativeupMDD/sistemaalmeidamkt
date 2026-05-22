@@ -1,8 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { MASTER_EMAIL } from "@/lib/supabase/constants";
 import { createClient } from "@/lib/supabase/server";
-
-export const MASTER_EMAIL = "matheus@almeidamkt.com.br";
 
 export type AppRole = "master" | "admin_clinica" | "secretaria" | "profissional";
 

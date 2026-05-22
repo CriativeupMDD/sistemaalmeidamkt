@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
+type SessionResponse = {
+  error?: string;
+  redirectTo?: string;
+};
+
 export function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -16,51 +23,76 @@ export function LoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isLoading) {
+      return;
+    }
+
     setIsLoading(true);
     setMessage(null);
 
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (error || !data.session) {
-      setMessage(error?.message ?? "Não foi possível iniciar a sessão.");
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password
+      });
+
+      if (error || !data.session || !data.user) {
+        console.error("[login] Falha ao autenticar no Supabase Auth", {
+          email: normalizedEmail,
+          error
+        });
+        setMessage(error?.message ?? "Nao foi possivel iniciar a sessao.");
+        return;
+      }
+
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 15000);
+
+      const sessionResponse = await fetch("/api/auth/session", {
+        body: JSON.stringify({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST",
+        signal: controller.signal
+      }).finally(() => window.clearTimeout(timeout));
+
+      const sessionPayload = (await sessionResponse.json().catch(() => null)) as SessionResponse | null;
+
+      if (!sessionResponse.ok || !sessionPayload?.redirectTo) {
+        console.error("[login] Falha ao criar sessao/perfil no servidor", {
+          email: normalizedEmail,
+          status: sessionResponse.status,
+          payload: sessionPayload
+        });
+        setMessage(sessionPayload?.error ?? "Login realizado, mas nao foi possivel iniciar a sessao do painel.");
+        return;
+      }
+
+      router.replace(sessionPayload.redirectTo);
+    } catch (error) {
+      console.error("[login] Erro inesperado no fluxo de login", {
+        email: normalizedEmail,
+        error
+      });
+      setMessage("Nao foi possivel acessar agora. Tente novamente.");
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    const sessionResponse = await fetch("/api/auth/session", {
-      body: JSON.stringify({
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      },
-      method: "POST"
-    });
-
-    if (!sessionResponse.ok) {
-      setMessage("Login realizado, mas não foi possível iniciar a sessão do painel.");
-      setIsLoading(false);
-      return;
-    }
-
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .maybeSingle();
-
-    const isMaster = data.user.email?.toLowerCase() === "matheus@almeidamkt.com.br" || profile?.role === "master";
-
-    window.location.href = isMaster ? "/master" : "/dashboard";
   }
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Entrar</CardTitle>
-        <CardDescription>Acesse o painel da clínica ou a administração master.</CardDescription>
+        <CardDescription>Acesse o painel da clinica ou a administracao master.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="grid gap-4" onSubmit={handleSubmit}>
