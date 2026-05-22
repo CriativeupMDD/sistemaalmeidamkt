@@ -23,7 +23,7 @@ export default async function MasterDashboardPage() {
   const monthlyRevenue = active.reduce((total, tenant) => total + tenant.monthly_price_cents, 0);
 
   return (
-    <DashboardShell scope="master" title="Painel master" description="Visão administrativa de todas as clínicas.">
+    <DashboardShell scope="master" title="Painel admin" description="Visão administrativa de todas as clínicas.">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         <StatCard title="Total de clínicas" value={String(rows.length)} icon={Building2} />
         <StatCard title="Clínicas ativas" value={String(active.length)} icon={Building2} />

@@ -91,9 +91,9 @@ export async function createTenantAction(formData: FormData) {
     });
   }
 
-  revalidatePath("/master");
-  revalidatePath("/master/clinicas");
-  redirect("/master/clinicas");
+  revalidatePath("/admin");
+  revalidatePath("/admin/clinicas");
+  redirect("/admin/clinicas");
 }
 
 export async function updateTenantAction(tenantId: string, formData: FormData) {
@@ -122,9 +122,9 @@ export async function updateTenantAction(tenantId: string, formData: FormData) {
     trial_starts_at: tenantPayload.trial_starts_at
   });
 
-  revalidatePath("/master");
-  revalidatePath("/master/clinicas");
-  redirect("/master/clinicas");
+  revalidatePath("/admin");
+  revalidatePath("/admin/clinicas");
+  redirect("/admin/clinicas");
 }
 
 export async function deleteTenantAction(tenantId: string) {
@@ -136,6 +136,6 @@ export async function deleteTenantAction(tenantId: string) {
     throw new Error(error.message);
   }
 
-  revalidatePath("/master");
-  revalidatePath("/master/clinicas");
+  revalidatePath("/admin");
+  revalidatePath("/admin/clinicas");
 }

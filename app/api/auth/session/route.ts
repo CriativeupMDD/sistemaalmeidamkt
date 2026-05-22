@@ -15,6 +15,7 @@ type UserProfile = {
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     access_token?: string;
+    requested_scope?: "admin" | "clinic";
     refresh_token?: string;
   } | null;
 
@@ -127,6 +128,16 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
   const secure = process.env.NODE_ENV === "production";
   const maxAge = data.session.expires_in ?? 60 * 60;
+  const redirectTo = isMasterEmail || profile?.role === "master" ? "/admin" : "/dashboard";
+
+  if (body.requested_scope === "admin" && redirectTo !== "/admin") {
+    console.error("[auth/session] Usuario sem permissao tentou acessar login administrativo", {
+      userId: user.id,
+      email: userEmail,
+      role: profile?.role
+    });
+    return NextResponse.json({ error: "Este acesso e exclusivo para administradores gerais." }, { status: 403 });
+  }
 
   cookieStore.set("sb-access-token", data.session.access_token, {
     httpOnly: true,
@@ -142,8 +153,6 @@ export async function POST(request: Request) {
     sameSite: "lax",
     secure
   });
-
-  const redirectTo = isMasterEmail || profile?.role === "master" ? "/master" : "/dashboard";
 
   return NextResponse.json({
     ok: true,

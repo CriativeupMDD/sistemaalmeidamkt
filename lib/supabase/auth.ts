@@ -93,7 +93,7 @@ export async function requireMaster() {
   const current = await getCurrentUserProfile();
 
   if (!current) {
-    redirect("/login");
+    redirect("/admin/login");
   }
 
   if (current.profile.role !== "master") {

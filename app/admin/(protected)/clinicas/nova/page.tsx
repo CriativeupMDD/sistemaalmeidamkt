@@ -1,5 +1,5 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { TenantForm } from "@/components/master/tenant-form";
+import { TenantForm } from "@/components/admin/tenant-form";
 import { createTenantAction } from "../actions";
 
 export default function NewTenantPage() {

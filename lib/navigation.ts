@@ -23,8 +23,8 @@ export const clinicNavigation = [
 ];
 
 export const masterNavigation = [
-  { href: "/master", label: "Painel", icon: LayoutDashboard },
-  { href: "/master/leads", label: "Leads", icon: Inbox },
-  { href: "/master/clinicas", label: "Clínicas", icon: Building2 },
-  { href: "/master/financeiro", label: "Financeiro", icon: CircleDollarSign }
+  { href: "/admin", label: "Painel", icon: LayoutDashboard },
+  { href: "/admin/leads", label: "Leads", icon: Inbox },
+  { href: "/admin/clinicas", label: "Clínicas", icon: Building2 },
+  { href: "/admin/financeiro", label: "Financeiro", icon: CircleDollarSign }
 ];

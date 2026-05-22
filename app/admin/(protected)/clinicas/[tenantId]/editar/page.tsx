@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { TenantForm } from "@/components/master/tenant-form";
+import { TenantForm } from "@/components/admin/tenant-form";
 import { getAuthenticatedSupabase } from "@/lib/supabase/auth";
 import { updateTenantAction } from "../../actions";
 

@@ -17,7 +17,7 @@ export function DashboardShell({ children, description, scope, title }: Dashboar
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r bg-white p-4 lg:block">
-        <Link className="mb-8 flex items-center gap-2 text-lg font-semibold" href={scope === "master" ? "/master" : "/app"}>
+        <Link className="mb-8 flex items-center gap-2 text-lg font-semibold" href={scope === "master" ? "/admin" : "/app"}>
           Sistema Clínica
         </Link>
         <nav className="grid gap-1">
@@ -41,7 +41,7 @@ export function DashboardShell({ children, description, scope, title }: Dashboar
           <div className="flex h-16 items-center justify-between px-4 lg:px-8">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                {scope === "master" ? "Administração" : "Clínica"}
+                {scope === "master" ? "Admin geral" : "Clínica"}
               </p>
               <h1 className="text-lg font-semibold">{title}</h1>
             </div>

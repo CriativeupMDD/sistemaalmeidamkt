@@ -24,7 +24,7 @@ const features = [
 
 const highlights = [
   "Landing individual para cada clínica",
-  "Painel master para gerenciar clientes SaaS",
+  "Painel admin para gerenciar clientes SaaS",
   "Cadastro de clínicas e usuários administradores",
   "Base preparada para crescer com Supabase e Vercel"
 ];
@@ -87,7 +87,7 @@ export default function HomePage() {
                 </span>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {["Agenda por profissional", "Clientes por clínica", "Financeiro recorrente", "Leads no master"].map(
+                {["Agenda por profissional", "Clientes por clínica", "Financeiro recorrente", "Leads no admin"].map(
                   (item) => (
                     <div key={item} className="rounded-md bg-white p-4 text-sm font-medium text-slate-900">
                       {item}
@@ -98,7 +98,7 @@ export default function HomePage() {
               <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-4">
                 <p className="text-sm font-medium">Fluxo comercial</p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  O visitante preenche o cadastro e o contato aparece no painel master para acompanhamento.
+                  O visitante preenche o cadastro e o contato aparece no Painel admin para acompanhamento.
                 </p>
               </div>
             </div>
@@ -131,12 +131,12 @@ export default function HomePage() {
           <div>
             <h2 className="text-3xl font-semibold">Pronto para transformar interesse em cliente.</h2>
             <p className="mt-4 text-sm leading-6 text-slate-300">
-              O formulário da landing alimenta o painel master, permitindo que você entre em contato com clínicas
+              O formulário da landing alimenta o Painel admin, permitindo que você entre em contato com clínicas
               interessadas e converta o cadastro em tenant ativo.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            {["Cadastrar lead", "Contato no master", "Criar clínica"].map((step, index) => (
+            {["Cadastrar lead", "Contato no admin", "Criar clínica"].map((step, index) => (
               <div className="rounded-md bg-white p-4 text-slate-950" key={step}>
                 <div className="mb-3 flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
                   {index + 1}

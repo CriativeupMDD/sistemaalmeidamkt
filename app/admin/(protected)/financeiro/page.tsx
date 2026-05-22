@@ -26,7 +26,7 @@ export default async function MasterFinancePage() {
   const tenantsById = new Map((tenants ?? []).map((tenant) => [tenant.id, tenant]));
 
   return (
-    <DashboardShell scope="master" title="Financeiro master" description="Assinaturas, trials e receita prevista do SaaS.">
+    <DashboardShell scope="master" title="Financeiro admin" description="Assinaturas, trials e receita prevista do SaaS.">
       <div className="overflow-hidden rounded-lg border bg-white">
         <table className="w-full text-sm">
           <thead className="bg-muted/70 text-left text-muted-foreground">

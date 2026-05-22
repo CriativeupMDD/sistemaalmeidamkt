@@ -91,7 +91,7 @@ export function TenantForm({ action, tenant, mode }: TenantFormProps) {
 
       <div className="flex flex-wrap justify-end gap-3">
         <Button asChild variant="outline">
-          <Link href="/master/clinicas">Cancelar</Link>
+          <Link href="/admin/clinicas">Cancelar</Link>
         </Button>
         <Button type="submit">
           <Save className="mr-2 size-4" />

@@ -3,9 +3,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
 import { MASTER_EMAIL } from "@/lib/supabase/constants";
 
-const protectedPrefixes = ["/app", "/dashboard", "/master"];
+const protectedPrefixes = ["/app", "/dashboard", "/admin"];
 
 function isProtectedPath(pathname: string) {
+  if (pathname === "/admin/login") {
+    return false;
+  }
+
   return protectedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
@@ -15,7 +19,8 @@ function redirectToLogin(request: NextRequest, reason: string) {
     reason
   });
 
-  const response = NextResponse.redirect(new URL("/login", request.url));
+  const loginPath = request.nextUrl.pathname.startsWith("/admin") ? "/admin/login" : "/login";
+  const response = NextResponse.redirect(new URL(loginPath, request.url));
   response.cookies.delete("sb-access-token");
   response.cookies.delete("sb-refresh-token");
   return response;
@@ -43,7 +48,9 @@ function persistSessionCookies(response: NextResponse, session: { access_token: 
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!isProtectedPath(pathname) && pathname !== "/login") {
+  const isLoginPath = pathname === "/login" || pathname === "/admin/login";
+
+  if (!isProtectedPath(pathname) && !isLoginPath) {
     return NextResponse.next({
       request
     });
@@ -53,7 +60,7 @@ export async function updateSession(request: NextRequest) {
   const refreshToken = request.cookies.get("sb-refresh-token")?.value;
 
   if (!accessToken || !refreshToken) {
-    return pathname === "/login"
+    return isLoginPath
       ? NextResponse.next({ request })
       : redirectToLogin(request, "cookies de sessao ausentes");
   }
@@ -79,7 +86,7 @@ export async function updateSession(request: NextRequest) {
       pathname,
       error: sessionError
     });
-    return pathname === "/login"
+    return isLoginPath
       ? NextResponse.next({ request })
       : redirectToLogin(request, "sessao invalida");
   }
@@ -91,7 +98,7 @@ export async function updateSession(request: NextRequest) {
       pathname,
       error: userError
     });
-    return pathname === "/login"
+    return isLoginPath
       ? NextResponse.next({ request })
       : redirectToLogin(request, "usuario ausente");
   }
@@ -118,19 +125,19 @@ export async function updateSession(request: NextRequest) {
     isMaster = profile?.role === "master";
   }
 
-  if (pathname === "/login") {
-    const response = NextResponse.redirect(new URL(isMaster ? "/master" : "/dashboard", request.url));
+  if (isLoginPath) {
+    const response = NextResponse.redirect(new URL(isMaster ? "/admin" : "/dashboard", request.url));
     persistSessionCookies(response, sessionData.session);
     return response;
   }
 
   if (pathname === "/dashboard" && isMaster) {
-    const response = NextResponse.redirect(new URL("/master", request.url));
+    const response = NextResponse.redirect(new URL("/admin", request.url));
     persistSessionCookies(response, sessionData.session);
     return response;
   }
 
-  if (pathname.startsWith("/master") && !isMaster) {
+  if (pathname.startsWith("/admin") && !isMaster) {
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
     persistSessionCookies(response, sessionData.session);
     return response;

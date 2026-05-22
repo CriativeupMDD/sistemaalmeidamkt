@@ -27,7 +27,7 @@ export default async function MasterClinicsPage() {
     <DashboardShell scope="master" title="Clínicas" description="Gestão das clínicas cadastradas no SaaS.">
       <div className="mb-4 flex justify-end">
         <Button asChild>
-          <Link href="/master/clinicas/nova">
+          <Link href="/admin/clinicas/nova">
             <Plus className="mr-2 size-4" />
             Nova clínica
           </Link>
@@ -66,7 +66,7 @@ export default async function MasterClinicsPage() {
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
                     <Button asChild size="icon" variant="ghost" aria-label="Editar clínica">
-                      <Link href={`/master/clinicas/${tenant.id}/editar`}>
+                      <Link href={`/admin/clinicas/${tenant.id}/editar`}>
                         <Edit className="size-4" />
                       </Link>
                     </Button>
