@@ -3,6 +3,7 @@ import {
   Building2,
   CalendarDays,
   CircleDollarSign,
+  Inbox,
   LayoutDashboard,
   ListChecks,
   MessageSquareText,
@@ -23,6 +24,7 @@ export const clinicNavigation = [
 
 export const masterNavigation = [
   { href: "/master", label: "Painel", icon: LayoutDashboard },
+  { href: "/master/leads", label: "Leads", icon: Inbox },
   { href: "/master/clinicas", label: "Clínicas", icon: Building2 },
   { href: "/master/financeiro", label: "Financeiro", icon: CircleDollarSign }
 ];

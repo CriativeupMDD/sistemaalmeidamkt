@@ -119,6 +119,34 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["subscriptions"]["Insert"]>;
         Relationships: [];
       };
+      landing_leads: {
+        Row: {
+          id: string;
+          clinic_name: string;
+          responsible_name: string;
+          email: string;
+          phone: string;
+          city: string | null;
+          state: string | null;
+          message: string | null;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          clinic_name: string;
+          responsible_name: string;
+          email: string;
+          phone: string;
+          city?: string | null;
+          state?: string | null;
+          message?: string | null;
+          status?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["landing_leads"]["Insert"]>;
+        Relationships: [];
+      };
       clinics: {
         Row: {
           id: string;
