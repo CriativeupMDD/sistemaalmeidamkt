@@ -39,10 +39,10 @@ export function LoginForm({ mode = "clinic" }: LoginFormProps) {
       const supabase = createClient();
       const origin = window.location.origin;
       const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
         options: {
           redirectTo: `${origin}/auth/callback`
-        },
-        provider: "google"
+        }
       });
 
       if (error) {

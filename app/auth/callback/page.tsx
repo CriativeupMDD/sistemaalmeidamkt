@@ -10,6 +10,10 @@ type SessionResponse = {
   redirectTo?: string;
 };
 
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [message, setMessage] = useState("Finalizando login com Google...");
@@ -31,30 +35,58 @@ export default function AuthCallbackPage() {
         }
 
         const code = url.searchParams.get("code");
+        let { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
-        if (code) {
+        if (!sessionData.session && code) {
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
           if (exchangeError) {
-            console.error("[auth/callback] Falha ao trocar code por sessao", { error: exchangeError });
+            console.error("[auth/callback] Falha ao trocar code OAuth por sessao", {
+              codePresent: Boolean(code),
+              error: exchangeError
+            });
             setMessage("Nao foi possivel validar sua conta Google.");
             return;
           }
+
+          ({ data: sessionData, error: sessionError } = await supabase.auth.getSession());
         }
 
-        const { data, error } = await supabase.auth.getSession();
+        for (let attempt = 1; !sessionData.session && attempt <= 8; attempt += 1) {
+          await sleep(250);
+          ({ data: sessionData, error: sessionError } = await supabase.auth.getSession());
+        }
 
-        if (error || !data.session) {
-          console.error("[auth/callback] Sessao OAuth ausente apos callback", { error });
+        if (sessionError || !sessionData.session) {
+          console.error("[auth/callback] Sessao OAuth ausente apos callback", {
+            codePresent: Boolean(code),
+            error: sessionError,
+            hashPresent: Boolean(window.location.hash),
+            search: window.location.search
+          });
           setMessage("Nao foi possivel iniciar a sessao com Google.");
           return;
         }
 
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !userData.user) {
+          console.error("[auth/callback] Sessao criada, mas usuario nao foi identificado", {
+            error: userError,
+            sessionUserId: sessionData.session.user?.id
+          });
+          setMessage("Nao foi possivel identificar seu usuario Google.");
+          return;
+        }
+
+        const userEmail = userData.user.email?.toLowerCase() ?? "";
+        const requestedScope = userEmail === "matheus@almeidamkt.com.br" ? "clinic" : "clinic_signup";
+
         const sessionResponse = await fetch("/api/auth/session", {
           body: JSON.stringify({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            requested_scope: "clinic"
+            access_token: sessionData.session.access_token,
+            refresh_token: sessionData.session.refresh_token,
+            requested_scope: requestedScope
           }),
           headers: {
             "Content-Type": "application/json"
@@ -65,7 +97,9 @@ export default function AuthCallbackPage() {
         const sessionPayload = (await sessionResponse.json().catch(() => null)) as SessionResponse | null;
 
         if (!sessionResponse.ok || !sessionPayload?.redirectTo) {
-          console.error("[auth/callback] Falha ao preparar cadastro trial", {
+          console.error("[auth/callback] Falha ao preparar sessao/cadastro Google", {
+            email: userEmail,
+            requestedScope,
             status: sessionResponse.status,
             payload: sessionPayload
           });
