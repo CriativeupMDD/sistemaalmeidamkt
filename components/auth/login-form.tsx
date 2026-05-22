@@ -20,15 +20,40 @@ export function LoginForm() {
     setMessage(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setMessage(error.message);
+    if (error || !data.session) {
+      setMessage(error?.message ?? "Não foi possível iniciar a sessão.");
       setIsLoading(false);
       return;
     }
 
-    window.location.href = "/app";
+    const sessionResponse = await fetch("/api/auth/session", {
+      body: JSON.stringify({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "POST"
+    });
+
+    if (!sessionResponse.ok) {
+      setMessage("Login realizado, mas não foi possível iniciar a sessão do painel.");
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    const isMaster = data.user.email?.toLowerCase() === "matheus@almeidamkt.com.br" || profile?.role === "master";
+
+    window.location.href = isMaster ? "/master" : "/dashboard";
   }
 
   return (
