@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
 import { MASTER_EMAIL } from "@/lib/supabase/constants";
 
-const protectedPrefixes = ["/app", "/dashboard", "/admin"];
+const protectedPrefixes = ["/app", "/dashboard", "/admin", "/master"];
 
 function isProtectedPath(pathname: string) {
   if (pathname === "/admin/login") {
@@ -126,13 +126,13 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isLoginPath) {
-    const response = NextResponse.redirect(new URL(isMaster ? "/admin" : "/dashboard", request.url));
+    const response = NextResponse.redirect(new URL(isMaster ? "/master" : "/dashboard", request.url));
     persistSessionCookies(response, sessionData.session);
     return response;
   }
 
   if (pathname === "/dashboard" && isMaster) {
-    const response = NextResponse.redirect(new URL("/admin", request.url));
+    const response = NextResponse.redirect(new URL("/master", request.url));
     persistSessionCookies(response, sessionData.session);
     return response;
   }

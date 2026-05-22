@@ -144,9 +144,9 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
   const secure = process.env.NODE_ENV === "production";
   const maxAge = data.session.expires_in ?? 60 * 60;
-  const redirectTo = isMasterEmail || profile?.role === "master" ? "/admin" : "/dashboard";
+  const redirectTo = isMasterEmail || profile?.role === "master" ? "/master" : "/dashboard";
 
-  if (body.requested_scope === "admin" && redirectTo !== "/admin") {
+  if (body.requested_scope === "admin" && redirectTo !== "/master") {
     console.error("[auth/session] Usuario sem permissao tentou acessar login administrativo", {
       userId: user.id,
       email: userEmail,

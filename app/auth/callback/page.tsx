@@ -12,7 +12,7 @@ type SessionResponse = {
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const [message, setMessage] = useState("Finalizando cadastro com Google...");
+  const [message, setMessage] = useState("Finalizando login com Google...");
 
   useEffect(() => {
     let mounted = true;
@@ -54,7 +54,7 @@ export default function AuthCallbackPage() {
           body: JSON.stringify({
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
-            requested_scope: "clinic_signup"
+            requested_scope: "clinic"
           }),
           headers: {
             "Content-Type": "application/json"
@@ -70,7 +70,7 @@ export default function AuthCallbackPage() {
             payload: sessionPayload
           });
           await supabase.auth.signOut();
-          setMessage(sessionPayload?.error ?? "Nao foi possivel criar seu teste gratis.");
+          setMessage(sessionPayload?.error ?? "Nao foi possivel finalizar o login com Google.");
           return;
         }
 
