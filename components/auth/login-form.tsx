@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, LogIn } from "lucide-react";
+import { Chrome, Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,8 +23,39 @@ export function LoginForm({ mode = "clinic" }: LoginFormProps) {
   const isAdminMode = mode === "admin";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  async function handleGoogleSignIn() {
+    if (isGoogleLoading || isLoading) {
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    setMessage(null);
+
+    try {
+      const supabase = createClient();
+      const origin = window.location.origin;
+      const { error } = await supabase.auth.signInWithOAuth({
+        options: {
+          redirectTo: `${origin}/auth/callback`
+        },
+        provider: "google"
+      });
+
+      if (error) {
+        console.error("[login/google] Falha ao iniciar OAuth Google", { error });
+        setMessage(error.message);
+        setIsGoogleLoading(false);
+      }
+    } catch (error) {
+      console.error("[login/google] Erro inesperado ao iniciar OAuth Google", { error });
+      setMessage("Nao foi possivel iniciar o login com Google.");
+      setIsGoogleLoading(false);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -141,6 +172,19 @@ export function LoginForm({ mode = "clinic" }: LoginFormProps) {
             {isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <LogIn className="mr-2 size-4" />}
             {isAdminMode ? "Acessar admin" : "Acessar"}
           </Button>
+          {!isAdminMode ? (
+            <div className="grid gap-3">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="h-px flex-1 bg-border" />
+                Criar conta
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <Button disabled={isGoogleLoading || isLoading} onClick={handleGoogleSignIn} type="button" variant="outline">
+                {isGoogleLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Chrome className="mr-2 size-4" />}
+                Entrar com Google
+              </Button>
+            </div>
+          ) : null}
         </form>
       </CardContent>
     </Card>

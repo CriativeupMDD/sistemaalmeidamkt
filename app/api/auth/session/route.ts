@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MASTER_EMAIL } from "@/lib/supabase/constants";
 import { createClient } from "@/lib/supabase/server";
+import { ensureTrialAccountForUser } from "@/lib/supabase/trial";
 
 type UserProfile = {
   email: string;
@@ -15,7 +16,7 @@ type UserProfile = {
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     access_token?: string;
-    requested_scope?: "admin" | "clinic";
+    requested_scope?: "admin" | "clinic" | "clinic_signup";
     refresh_token?: string;
   } | null;
 
@@ -62,6 +63,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nao foi possivel buscar o perfil do usuario." }, { status: 500 });
     }
 
+    if (body.requested_scope === "clinic_signup" && !isMasterEmail && !existingProfile?.tenant_id) {
+      try {
+        profile = await ensureTrialAccountForUser(user);
+      } catch (trialError) {
+        console.error("[auth/session] Erro ao criar trial do cadastro Google", {
+          userId: user.id,
+          email: userEmail,
+          error: trialError
+        });
+        return NextResponse.json({ error: "Nao foi possivel criar seu teste gratis de 7 dias." }, { status: 500 });
+      }
+    }
+
     const nextProfile: UserProfile = {
       email: userEmail,
       full_name: existingProfile?.full_name ?? user.user_metadata?.full_name ?? user.email ?? "Usuario",
@@ -76,7 +90,9 @@ export async function POST(request: Request) {
       existingProfile?.tenant_id !== nextProfile.tenant_id;
     const canUpdateExistingProfile = usesServiceRole || isMasterEmail;
 
-    if (!existingProfile) {
+    if (profile) {
+      // Trial ja foi criado e vinculado acima.
+    } else if (!existingProfile) {
       const { data: savedProfile, error: upsertError } = await profileClient
         .from("user_profiles")
         .insert(nextProfile)
