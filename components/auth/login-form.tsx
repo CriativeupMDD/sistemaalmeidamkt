@@ -37,21 +37,37 @@ export function LoginForm({ mode = "clinic" }: LoginFormProps) {
 
     try {
       const supabase = createClient();
-      const origin = window.location.origin;
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      console.log("[login/google] Iniciando OAuth Google", {
+        redirectTo,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+        anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 8)
+      });
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/callback`
+          redirectTo,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent"
+          }
         }
       });
 
       if (error) {
-        console.error("[login/google] Falha ao iniciar OAuth Google", { error });
+        console.error("Erro ao iniciar login Google:", error);
         setMessage(error.message);
         setIsGoogleLoading(false);
       }
     } catch (error) {
-      console.error("[login/google] Erro inesperado ao iniciar OAuth Google", { error });
+      console.error("[login/google] Erro inesperado ao iniciar OAuth Google", {
+        error,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+        anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 8)
+      });
       setMessage("Nao foi possivel iniciar o login com Google.");
       setIsGoogleLoading(false);
     }
